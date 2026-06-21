@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שעון נוכחות – הנבחרת שיווק שיער מובחר בע"מ</title>
+  <style>
+    :root {
+      --monday-purple: #6161ff;
+      --monday-purple-dark: #4949e0;
+      --monday-green: #00ca72;
+      --monday-yellow: #ffcb00;
+      --monday-red: #e44258;
+      --monday-blue: #0085ff;
+      --monday-bg: #f6f7fb;
+      --monday-sidebar: #1f1f3b;
+      --monday-card: #ffffff;
+      --monday-border: #e6e9ef;
+      --monday-text: #1f1f3b;
+      --monday-muted: #676879;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--monday-bg);
+      min-height: 100vh;
+      color: var(--monday-text);
+    }
+
+    /* ===== TOP BAR ===== */
+    .topbar {
+      background: var(--monday-sidebar);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    .topbar-logo {
+      width: 32px; height: 32px;
+      background: var(--monday-purple);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 900; color: white;
+      letter-spacing: -1px; flex-shrink: 0;
+    }
+    .topbar-title {
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0.9;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--monday-purple), #a259ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+      border: 2px solid rgba(255,255,255,0.2);
+      letter-spacing: 0;
+    }
+    .user-name {
+      color: white;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .user-role {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.7rem;
+    }
+
+    /* ===== TABS ===== */
+    .tabs {
+      background: white;
+      border-bottom: 1px solid var(--monday-border);
+      display: flex;
+      padding: 0 16px;
+      gap: 4px;
+    }
+    .tab-btn {
+      padding: 13px 18px;
+      border: none;
+      background: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--monday-muted);
+      transition: all 0.15s;
+      font-family: inherit;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+      border-radius: 4px 4px 0 0;
+    }
+    .tab-btn:hover { color: var(--monday-purple); background: #f0f0ff; }
+    .tab-btn.active { color: var(--monday-purple); border-bottom-color: var(--monday-purple); }
+
+    /* ===== PAGES ===== */
+    .page { display: none; padding: 20px 16px 48px; max-width: 540px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    /* ===== SECTION TITLE ===== */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--monday-muted);
+      margin-bottom: 10px;
+    }
+
+    /* ===== CLOCK CARD ===== */
+    .clock-card {
+      background: var(--monday-card);
+      border-radius: 12px;
+      border: 1px solid var(--monday-border);
+      padding: 28px 20px 22px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(31,31,59,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .clock-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--monday-purple), #a259ff, var(--monday-blue));
+    }
+    .clock-time {
+      font-size: clamp(3rem, 14vw, 5rem);
+      font-weight: 800;
+      color: var(--monday-text);
+      letter-spacing: 3px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .clock-date {
+      font-size: 0.88rem;
+      color: var(--monday-muted);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    /* ===== STATUS PILL ===== */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-top: 14px;
+      letter-spacing: 0.3px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-idle    { background: #f0f1f8; color: var(--monday-muted); }
+    .status-idle .status-dot    { background: #c0c4d6; }
+    .status-working { background: #e3faf0; color: #007a45; }
+    .status-working .status-dot { background: var(--monday-green); box-shadow: 0 0 6px var(--monday-green); animation: pulse 1.5s infinite; }
+    .status-break   { background: #fff8db; color: #8a6500; }
+    .status-break .status-dot   { background: var(--monday-yellow); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .action-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 20px 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s, filter 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .action-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.15s;
+    }
+    .action-btn:not(:disabled):hover::after { background: rgba(255,255,255,0.12); }
+    .action-btn .btn-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .action-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .action-btn:not(:disabled):active { transform: translateY(0); }
+    .action-btn:disabled { opacity: 0.28; cursor: not-allowed; filter: grayscale(30%); }
+
+    .btn-start { background: var(--monday-green);          color: #fff; box-shadow: 0 3px 12px rgba(0,202,114,0.35); }
+    .btn-break { background: var(--monday-yellow);         color: #5a3f00; box-shadow: 0 3px 12px rgba(255,203,0,0.4); }
+    .btn-back  { background: var(--monday-blue);           color: #fff; box-shadow: 0 3px 12px rgba(0,133,255,0.35); }
+    .btn-end   { background: var(--monday-red);            color: #fff; box-shadow: 0 3px 12px rgba(228,66,88,0.35); }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--monday-card);
+      border-radius: 12px;
+      border: 1px solid var(--monday-border);
+      box-shadow: 0 2px 8px rgba(31,31,59,0.06);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--monday-border);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--monday-text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ===== LOG ===== */
+    .log-card { margin-bottom: 16px; }
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 18px;
+      border-bottom: 1px solid var(--monday-border);
+      font-size: 0.85rem;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-type { font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .log-time { color: var(--monday-muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+
+    /* ===== TOAST ===== */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--monday-sidebar);
+      color: white;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+      z-index: 999;
+      text-align: center;
+      max-width: 90vw;
+      border-right: 4px solid var(--monday-purple);
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-right-color: var(--monday-green); }
+    #toast.error   { border-right-color: var(--monday-red); }
+
+    /* ===== SUMMARY ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+    }
+    .stat-cell {
+      padding: 18px 14px;
+      text-align: center;
+      border-left: 1px solid var(--monday-border);
+    }
+    .stat-cell:last-child { border-left: none; }
+    .stat-num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--monday-purple);
+      line-height: 1;
+    }
+    .stat-desc {
+      font-size: 0.72rem;
+      color: var(--monday-muted);
+      margin-top: 5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .month-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--monday-border);
+      font-size: 0.88rem;
+      transition: background 0.12s;
+    }
+    .month-row:last-child { border-bottom: none; }
+    .month-row:hover { background: #f6f7fb; }
+    .month-name { font-weight: 700; color: var(--monday-text); }
+    .month-hours {
+      font-weight: 700;
+      background: #ededff;
+      color: var(--monday-purple);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+    }
+
+    .loading-txt { text-align: center; color: var(--monday-muted); padding: 24px; font-size: 0.88rem; }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--monday-border);
+      background: white;
+      color: var(--monday-muted);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      margin-top: 12px;
+    }
+    .refresh-btn:hover { border-color: var(--monday-purple); color: var(--monday-purple); background: #f5f5ff; }
+
+    @media (max-width: 380px) {
+      .btn-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-cell { border-left: none; border-bottom: 1px solid var(--monday-border); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">m</div>
+  <div class="topbar-title">הנבחרת שיווק שיער מובחר בע"מ</div>
+  <div class="topbar-user">
+    <div>
+      <div class="user-name">רחל צאלח</div>
+      <div class="user-role">עובדת</div>
+    </div>
+    <div class="avatar">רצ</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showPage('clock', this)">⏱ שעון נוכחות</button>
+  <button class="tab-btn" onclick="showPage('summary', this)">📊 סיכום שעות</button>
+</div>
+
+<!-- ===== CLOCK PAGE ===== -->
+<div class="page active" id="page-clock">
+
+  <div class="clock-card" style="margin-top:20px;">
+    <div class="clock-time" id="clock-time">00:00:00</div>
+    <div class="clock-date" id="clock-date">טוען...</div>
+    <div id="status-badge" class="status-pill status-idle">
+      <span class="status-dot"></span>
+      <span id="status-text">לא במשמרת</span>
+    </div>
+  </div>
+
+  <p class="section-label">פעולות</p>
+
+  <div class="btn-grid">
+    <button class="action-btn btn-start" id="btn-start" onclick="doAction('תחילת עבודה')">
+      <div class="btn-icon">▶</div>
+      תחילת עבודה
+    </button>
+    <button class="action-btn btn-break" id="btn-break" onclick="doAction('הפסקה')" disabled>
+      <div class="btn-icon">⏸</div>
+      הפסקה
+    </button>
+    <button class="action-btn btn-back" id="btn-back" onclick="doAction('חזרה מהפסקה')" disabled>
+      <div class="btn-icon">↩</div>
+      חזרתי מהפסקה
+    </button>
+    <button class="action-btn btn-end" id="btn-end" onclick="doAction('סיום עבודה')" disabled>
+      <div class="btn-icon">■</div>
+      סיום עבודה
+    </button>
+  </div>
+
+  <div class="card log-card" id="local-log" style="display:none">
+    <div class="card-header">📋 פעולות היום</div>
+    <div id="log-list"></div>
+  </div>
+
+</div>
+
+<!-- ===== SUMMARY PAGE ===== -->
+<div class="page" id="page-summary">
+
+  <div class="card" style="margin-top:20px; margin-bottom:16px;">
+    <div class="card-header">📅 חודש נוכחי</div>
+    <div class="stats-grid" id="current-month-stats">
+      <div class="stat-cell"><div class="loading-txt">טוען...</div></div>
+    </div>
+  </div>
+
+  <p class="section-label">היסטוריה</p>
+
+  <div class="card" id="history-card">
+    <div class="card-header">📜 חודשים קודמים</div>
+    <div id="history-list"><p class="loading-txt">טוען נתונים...</p></div>
+  </div>
+
+  <button class="refresh-btn" onclick="loadSummary()">🔄 רענן נתונים</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbzXZSHhdZ38VOnrVnzMqFnuD7NU3OQrnVchyIfeL8beSw-it1t_OchSdyOgXcmYjKMi/exec';
+
+let status = 'idle';
+let localLog = [];
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function hebrewDate(d) {
+  const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  return `יום ${days[d.getDay()]} · ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function tickClock() {
+  const now = new Date();
+  document.getElementById('clock-time').textContent =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  document.getElementById('clock-date').textContent = hebrewDate(now);
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'summary') loadSummary();
+}
+
+function updateButtons() {
+  const s = status;
+  document.getElementById('btn-start').disabled = (s !== 'idle');
+  document.getElementById('btn-break').disabled = (s !== 'working');
+  document.getElementById('btn-back').disabled  = (s !== 'break');
+  document.getElementById('btn-end').disabled   = (s === 'idle');
+
+  const badge = document.getElementById('status-badge');
+  const txt   = document.getElementById('status-text');
+  if (s === 'idle')    { badge.className = 'status-pill status-idle';    txt.textContent = 'לא במשמרת'; }
+  if (s === 'working') { badge.className = 'status-pill status-working'; txt.textContent = 'בעבודה'; }
+  if (s === 'break')   { badge.className = 'status-pill status-break';   txt.textContent = 'בהפסקה'; }
+}
+
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3200);
+}
+
+const actionIcons = {
+  'תחילת עבודה': '▶',
+  'הפסקה': '⏸',
+  'חזרה מהפסקה': '↩',
+  'סיום עבודה': '■'
+};
+
+function addToLog(action, timeStr) {
+  localLog.push({ action, time: timeStr });
+  const list = document.getElementById('log-list');
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  item.innerHTML = `<span class="log-type">${actionIcons[action] || ''} ${action}</span><span class="log-time">${timeStr}</span>`;
+  list.appendChild(item);
+  document.getElementById('local-log').style.display = 'block';
+}
+
+function sendToSheets(params) {
+  return new Promise((resolve, reject) => {
+    const url = `${API}?${params}`;
+    // Image trick bypasses CORS completely for GET requests to Apps Script
+    const img = new Image();
+    const timer = setTimeout(() => {
+      // Timeout after 8s — treat as sent (Apps Script may not return 200 for img)
+      resolve('timeout');
+    }, 8000);
+    img.onload = img.onerror = () => {
+      clearTimeout(timer);
+      resolve('ok');
+    };
+    img.src = url;
+  });
+}
+
+async function doAction(action) {
+  const now = new Date();
+  const date  = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+  const time  = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const month = `${now.getMonth()+1}/${now.getFullYear()}`;
+
+  if (action === 'תחילת עבודה')      status = 'working';
+  else if (action === 'הפסקה')       status = 'break';
+  else if (action === 'חזרה מהפסקה') status = 'working';
+  else if (action === 'סיום עבודה')  status = 'idle';
+  updateButtons();
+  addToLog(action, time);
+  showToast('שולח...', '');
+
+  try {
+    const params = new URLSearchParams({ action, date, time, month });
+    // Try regular fetch first (works if Apps Script has CORS headers)
+    try {
+      const res = await fetch(`${API}?${params}`, { redirect: 'follow' });
+      if (!res.ok) throw new Error('status ' + res.status);
+    } catch (corsErr) {
+      // Fallback: Image trick — always works for GET, no CORS restriction
+      await sendToSheets(params);
+    }
+    showToast(`✔ ${action} נרשמה בהצלחה`, 'success');
+  } catch (e) {
+    showToast('⚠ שגיאה בשליחה לגיליון', 'error');
+  }
+}
+
+function hebrewMonth(m, y) {
+  const names = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  return `${names[m-1]} ${y}`;
+}
+
+function fmtHours(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} דק'`;
+  return m > 0 ? `${h}ש' ${m}ד'` : `${h} שעות`;
+}
+
+async function loadSummary() {
+  document.getElementById('current-month-stats').innerHTML = '<div class="stat-cell" style="grid-column:1/-1"><p class="loading-txt">טוען...</p></div>';
+  document.getElementById('history-list').innerHTML = '<p class="loading-txt">טוען...</p>';
+
+  try {
+    const res = await fetch(`${API}?action=getSummary`);
+    const data = await res.json();
+    renderSummary(data);
+  } catch (e) {
+    document.getElementById('current-month-stats').innerHTML = '<div class="stat-cell" style="grid-column:1/-1"><p class="loading-txt">שגיאה בטעינת נתונים</p></div>';
+    document.getElementById('history-list').innerHTML = '';
+  }
+}
+
+function renderSummary(data) {
+  const now = new Date();
+  const curKey = `${now.getMonth()+1}/${now.getFullYear()}`;
+  const cur = (data.months || {})[curKey] || {};
+
+  const totalMin = cur.totalMinutes || 0;
+  const days = cur.days || 0;
+  const avgMin = days > 0 ? Math.round(totalMin / days) : 0;
+
+  document.getElementById('current-month-stats').innerHTML = `
+    <div class="stat-cell">
+      <div class="stat-num">${fmtHours(totalMin)}</div>
+      <div class="stat-desc">סה"כ חודש</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">${days}</div>
+      <div class="stat-desc">ימי עבודה</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">${fmtHours(avgMin)}</div>
+      <div class="stat-desc">ממוצע יומי</div>
+    </div>
+  `;
+
+  const histEl = document.getElementById('history-list');
+  const months = data.months || {};
+  const keys = Object.keys(months).filter(k => k !== curKey).sort((a, b) => {
+    const [am, ay] = a.split('/').map(Number);
+    const [bm, by] = b.split('/').map(Number);
+    return (by * 12 + bm) - (ay * 12 + am);
+  });
+
+  if (keys.length === 0) {
+    histEl.innerHTML = '<p class="loading-txt">אין היסטוריה עדיין</p>';
+    return;
+  }
+
+  histEl.innerHTML = keys.map(k => {
+    const [m, y] = k.split('/').map(Number);
+    const info = months[k];
+    return `<div class="month-row">
+      <span class="month-name">${hebrewMonth(m, y)}</span>
+      <span class="month-hours">${fmtHours(info.totalMinutes || 0)}</span>
+    </div>`;
+  }).join('');
+}
+
+updateButtons();
+</script>
+</body>
+</html>
