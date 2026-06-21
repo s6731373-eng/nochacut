@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שעון נוכחות – הנבחרת שיווק שיער מובחר בע"מ</title>
+  <style>
+    :root {
+      --bg:       #f0f2f5;
+      --card:     #ffffff;
+      --border:   #e4e7ed;
+      --text:     #111827;
+      --muted:    #6b7280;
+      --accent:   #4f46e5;
+      --green:    #16a34a;
+      --green-bg: #dcfce7;
+      --yellow:   #b45309;
+      --yellow-bg:#fef9c3;
+      --red:      #dc2626;
+      --red-bg:   #fee2e2;
+      --blue:     #1d4ed8;
+      --blue-bg:  #dbeafe;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-md: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+      --radius:   16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== TOP BAR ===== */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-logo {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800; color: white;
+      flex-shrink: 0;
+    }
+    .topbar-title {
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 600;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--muted);
+    }
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: white;
+    }
+    .user-info { text-align: right; }
+    .user-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .user-role { font-size: 0.7rem; color: var(--muted); }
+
+    /* ===== TABS ===== */
+    .tabs {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 20px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .tab-btn {
+      padding: 14px 16px;
+      border: none;
+      background: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: inherit;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn:not(.active):hover { color: var(--text); }
+
+    /* ===== PAGE WRAPPER ===== */
+    .page { display: none; padding: 20px 16px 56px; max-width: 480px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    /* ===== CARD BASE ===== */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .card-header {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    /* ===== CLOCK CARD ===== */
+    .clock-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 32px 24px 24px;
+      text-align: center;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .clock-accent-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed, #2563eb);
+      border-radius: 3px 3px 0 0;
+    }
+    .clock-time {
+      font-size: clamp(3rem, 13vw, 4.5rem);
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 2px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .clock-date {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 8px;
+      font-weight: 400;
+    }
+
+    /* ===== STATUS PILL ===== */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .status-idle    { background: #f3f4f6; color: var(--muted); }
+    .status-idle    .status-dot { background: #9ca3af; }
+    .status-working { background: var(--green-bg); color: var(--green); }
+    .status-working .status-dot { background: #16a34a; animation: blink 1.6s ease-in-out infinite; }
+    .status-break   { background: var(--yellow-bg); color: var(--yellow); }
+    .status-break   .status-dot { background: #d97706; }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .btn-primary-wrap {
+      margin-bottom: 10px;
+    }
+    .btn-secondary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .action-btn {
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.18s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    .action-btn:not(:disabled):active { transform: scale(0.97); }
+    .action-btn:disabled {
+      opacity: 0.38;
+      cursor: default;
+      filter: saturate(0.4);
+    }
+
+    /* Primary — תחילת עבודה */
+    .btn-start {
+      width: 100%;
+      padding: 18px;
+      font-size: 1rem;
+      background: var(--green);
+      color: white;
+      box-shadow: 0 4px 14px rgba(22,163,74,0.35);
+      flex-direction: row;
+      gap: 10px;
+    }
+    .btn-start:not(:disabled):hover { box-shadow: 0 6px 20px rgba(22,163,74,0.45); transform: translateY(-1px); }
+    .btn-start .btn-icon { font-size: 1.1rem; }
+
+    /* Secondary buttons */
+    .btn-break, .btn-back, .btn-end {
+      padding: 16px 8px 14px;
+      font-size: 0.82rem;
+    }
+    .btn-break {
+      background: var(--yellow-bg);
+      color: var(--yellow);
+      border: 1.5px solid #fcd34d;
+    }
+    .btn-break:not(:disabled):hover { background: #fef3c7; }
+    .btn-back {
+      background: var(--blue-bg);
+      color: var(--blue);
+      border: 1.5px solid #93c5fd;
+    }
+    .btn-back:not(:disabled):hover { background: #dbeafe; }
+    .btn-end {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1.5px solid #fca5a5;
+    }
+    .btn-end:not(:disabled):hover { background: #fee2e2; }
+
+    .btn-icon-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.07);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      margin-bottom: 2px;
+    }
+
+    /* ===== DAY SUMMARY CARD ===== */
+    .day-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .day-stat {
+      padding: 16px 10px;
+      text-align: center;
+      border-left: 1px solid var(--border);
+    }
+    .day-stat:last-child { border-left: none; }
+    .day-stat-num {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .day-stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ===== LOG LIST ===== */
+    .log-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .log-dot-start  { background: var(--green); }
+    .log-dot-break  { background: #d97706; }
+    .log-dot-back   { background: var(--blue); }
+    .log-dot-end    { background: var(--red); }
+    .log-type { font-weight: 600; flex: 1; }
+    .log-time { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+    /* ===== TOAST ===== */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(72px);
+      background: #1f2937;
+      color: white;
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      transition: transform 0.22s cubic-bezier(.34,1.4,.64,1);
+      z-index: 999;
+      max-width: 88vw;
+      text-align: center;
+    }
+    #toast.show   { transform: translateX(-50%) translateY(0); }
+    #toast.success { background: #15803d; }
+    #toast.error   { background: #b91c1c; }
+
+    /* ===== SUMMARY PAGE ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .stat-cell {
+      padding: 20px 10px;
+      text-align: center;
+      border-left: 1px solid var(--border);
+    }
+    .stat-cell:last-child { border-left: none; }
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-desc {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    .month-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .month-row:last-child { border-bottom: none; }
+    .month-name { font-weight: 600; }
+    .month-hours {
+      font-weight: 600;
+      background: #ede9fe;
+      color: var(--accent);
+      padding: 3px 11px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+
+    .loading-txt { text-align: center; color: var(--muted); padding: 28px; font-size: 0.875rem; }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      padding: 13px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      margin-top: 12px;
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin: 18px 0 8px;
+    }
+
+    @media (max-width: 360px) {
+      .btn-secondary-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid, .day-stats { grid-template-columns: 1fr; }
+      .stat-cell, .day-stat { border-left: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">נ</div>
+  <div class="topbar-title">הנבחרת שיווק שיער מובחר בע"מ</div>
+  <div class="topbar-user">
+    <div class="user-info">
+      <div class="user-name">רחל צאלח</div>
+      <div class="user-role">עובדת</div>
+    </div>
+    <div class="avatar">רצ</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showPage('clock', this)">שעון נוכחות</button>
+  <button class="tab-btn" onclick="showPage('summary', this)">סיכום שעות</button>
+</div>
+
+<!-- ===== CLOCK PAGE ===== -->
+<div class="page active" id="page-clock">
+
+  <!-- Clock card -->
+  <div class="clock-card">
+    <div class="clock-accent-bar"></div>
+    <div class="clock-time" id="clock-time">00:00:00</div>
+    <div class="clock-date" id="clock-date">טוען...</div>
+    <div id="status-badge" class="status-pill status-idle">
+      <span class="status-dot"></span>
+      <span id="status-text">לא במשמרת</span>
+    </div>
+  </div>
+
+  <!-- Primary button -->
+  <div class="btn-primary-wrap">
+    <button class="action-btn btn-start" id="btn-start" onclick="doAction('תחילת עבודה')">
+      <span class="btn-icon">▶</span>
+      תחילת עבודה
+    </button>
+  </div>
+
+  <!-- Secondary buttons -->
+  <div class="btn-secondary-grid">
+    <button class="action-btn btn-break" id="btn-break" onclick="doAction('הפסקה')" disabled>
+      <div class="btn-icon-circle">⏸</div>
+      הפסקה
+    </button>
+    <button class="action-btn btn-back" id="btn-back" onclick="doAction('חזרה מהפסקה')" disabled>
+      <div class="btn-icon-circle">↩</div>
+      חזרתי
+    </button>
+    <button class="action-btn btn-end" id="btn-end" onclick="doAction('סיום עבודה')" disabled>
+      <div class="btn-icon-circle">■</div>
+      סיום
+    </button>
+  </div>
+
+  <!-- Day summary -->
+  <div class="card" id="day-summary-card" style="display:none">
+    <div class="card-header">סיכום היום</div>
+    <div class="day-stats">
+      <div class="day-stat">
+        <div class="day-stat-num" id="ds-entry">—</div>
+        <div class="day-stat-label">שעת כניסה</div>
+      </div>
+      <div class="day-stat">
+        <div class="day-stat-num" id="ds-work">0ש'</div>
+        <div class="day-stat-label">שעות עבודה</div>
+      </div>
+      <div class="day-stat">
+        <div class="day-stat-num" id="ds-break">0ד'</div>
+        <div class="day-stat-label">הפסקות</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity log -->
+  <p class="section-label" id="log-label" style="display:none">יומן פעולות</p>
+  <div class="card" id="local-log" style="display:none">
+    <div id="log-list"></div>
+  </div>
+
+</div>
+
+<!-- ===== SUMMARY PAGE ===== -->
+<div class="page" id="page-summary">
+
+  <div class="card">
+    <div class="card-header">חודש נוכחי</div>
+    <div class="stats-grid" id="current-month-stats">
+      <div class="stat-cell" style="grid-column:1/-1"><p class="loading-txt">טוען...</p></div>
+    </div>
+  </div>
+
+  <p class="section-label">חודשים קודמים</p>
+
+  <div class="card">
+    <div id="history-list"><p class="loading-txt">טוען נתונים...</p></div>
+  </div>
+
+  <button class="refresh-btn" onclick="loadSummary()">↺ רענן נתונים</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyrep5rRvhUF608mnO6nkyFcMzc8FKk3ZZcyPfN5I7UXczLcv0tx3xuNlvXlmSXKAA_/exec';
+
+let status = 'idle';
+let localLog = [];
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function hebrewDate(d) {
+  const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  return `יום ${days[d.getDay()]} · ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function tickClock() {
+  const now = new Date();
+  document.getElementById('clock-time').textContent =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  document.getElementById('clock-date').textContent = hebrewDate(now);
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'summary') loadSummary();
+}
+
+function updateButtons() {
+  const s = status;
+  document.getElementById('btn-start').disabled = (s !== 'idle');
+  document.getElementById('btn-break').disabled = (s !== 'working');
+  document.getElementById('btn-back').disabled  = (s !== 'break');
+  document.getElementById('btn-end').disabled   = (s === 'idle');
+
+  const badge = document.getElementById('status-badge');
+  const txt   = document.getElementById('status-text');
+  if (s === 'idle')    { badge.className = 'status-pill status-idle';    txt.textContent = 'לא במשמרת'; }
+  if (s === 'working') { badge.className = 'status-pill status-working'; txt.textContent = 'בעבודה'; }
+  if (s === 'break')   { badge.className = 'status-pill status-break';   txt.textContent = 'בהפסקה'; }
+}
+
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3200);
+}
+
+const logDotClass = {
+  'תחילת עבודה':   'log-dot-start',
+  'הפסקה':         'log-dot-break',
+  'חזרה מהפסקה':  'log-dot-back',
+  'סיום עבודה':   'log-dot-end'
+};
+
+function addToLog(action, timeStr) {
+  localLog.push({ action, time: timeStr });
+  const list = document.getElementById('log-list');
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  const dotCls = logDotClass[action] || 'log-dot-start';
+  item.innerHTML = `<span class="log-dot ${dotCls}"></span><span class="log-type">${action}</span><span class="log-time">${timeStr}</span>`;
+  list.appendChild(item);
+  document.getElementById('local-log').style.display = 'block';
+  document.getElementById('log-label').style.display = 'block';
+  updateDaySummary();
+}
+
+function updateDaySummary() {
+  if (localLog.length === 0) return;
+  document.getElementById('day-summary-card').style.display = 'block';
+
+  // Entry time = first תחילת עבודה
+  const entry = localLog.find(r => r.action === 'תחילת עבודה');
+  document.getElementById('ds-entry').textContent = entry ? entry.time.slice(0,5) : '—';
+
+  // Calc work & break minutes from localLog using same logic as calcMinutes
+  const now = new Date();
+  const todayStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+  const rows = localLog.map(r => ({ date: todayStr, time: r.time, type: r.action }));
+
+  let workMs = 0, breakMs = 0;
+  let workStart = null, breakStart = null;
+  for (const r of rows) {
+    const ts = toDate(r.date, r.time);
+    if (r.type === 'תחילת עבודה')    { workStart = ts; breakStart = null; }
+    else if (r.type === 'הפסקה' && workStart)       { breakStart = ts; }
+    else if (r.type === 'חזרה מהפסקה' && breakStart) {
+      breakMs += ts - breakStart; breakStart = null;
+    }
+    else if (r.type === 'סיום עבודה' && workStart)  {
+      workMs += ts - workStart; workStart = null; breakStart = null;
+    }
+  }
+  // If still working (no סיום) — count up to now
+  if (workStart) {
+    const elapsed = new Date() - workStart - breakMs - (breakStart ? new Date() - breakStart : 0);
+    workMs += Math.max(0, elapsed);
+  }
+
+  const wMin = Math.round(workMs / 60000);
+  const bMin = Math.round(breakMs / 60000);
+
+  const wH = Math.floor(wMin / 60), wM = wMin % 60;
+  document.getElementById('ds-work').textContent  = wH > 0 ? `${wH}ש' ${wM > 0 ? wM+"ד'" : ''}`.trim() : `${wMin}ד'`;
+  document.getElementById('ds-break').textContent = bMin > 0 ? `${bMin}ד'` : '—';
+}
+
+async function doAction(action) {
+  const now = new Date();
+  const date = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+  if (action === 'תחילת עבודה')      status = 'working';
+  else if (action === 'הפסקה')       status = 'break';
+  else if (action === 'חזרה מהפסקה') status = 'working';
+  else if (action === 'סיום עבודה')  status = 'idle';
+  updateButtons();
+  addToLog(action, time);
+  showToast('שולח...', '');
+
+  try {
+    await fetch(API, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ date, time, type: action })
+    });
+    showToast(`✔ ${action} נרשמה בהצלחה`, 'success');
+  } catch (e) {
+    showToast('⚠ שגיאה בשליחה לגיליון', 'error');
+  }
+}
+
+function hebrewMonth(m, y) {
+  const names = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  return `${names[m-1]} ${y}`;
+}
+
+function fmtHours(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} דק'`;
+  return m > 0 ? `${h}ש' ${m}ד'` : `${h} שעות`;
+}
+
+// Parse a row from the API into { date, time, type }
+// Handles both array rows and object rows
+function parseRow(row) {
+  if (Array.isArray(row)) return { date: row[0], time: row[1], type: row[2] };
+  // object — try common field name variations
+  return {
+    date: row.date || row.Date || row.תאריך || '',
+    time: row.time || row.Time || row.שעה   || '',
+    type: row.type || row.Type || row.סוג   || row.action || row.פעולה || ''
+  };
+}
+
+// Convert "HH:MM" or "HH:MM:SS" string + date string to a Date object
+function toDate(dateStr, timeStr) {
+  // dateStr: "D/M/YYYY"
+  const [d, m, y] = dateStr.split('/').map(Number);
+  const [hh, mm, ss = 0] = timeStr.split(':').map(Number);
+  return new Date(y, m - 1, d, hh, mm, ss);
+}
+
+// Given sorted array of {date,time,type} rows, compute total work minutes
+// Logic: start→end minus breaks; handles multiple sessions per day
+function calcMinutes(rows) {
+  let totalMs = 0;
+  let workStart = null;
+  let breakStart = null;
+
+  for (const r of rows) {
+    const t = r.type;
+    const ts = toDate(r.date, r.time);
+
+    if (t === 'תחילת עבודה') {
+      workStart = ts;
+      breakStart = null;
+    } else if (t === 'הפסקה' && workStart) {
+      breakStart = ts;
+    } else if (t === 'חזרה מהפסקה' && breakStart) {
+      // subtract break duration from accumulation (add it back as negative)
+      totalMs -= (ts - breakStart);
+      breakStart = null;
+    } else if (t === 'סיום עבודה' && workStart) {
+      totalMs += (ts - workStart);
+      workStart = null;
+      breakStart = null;
+    }
+  }
+  return Math.round(totalMs / 60000); // ms → minutes
+}
+
+// Group rows by "M/YYYY" and count unique work days
+function groupByMonth(rows) {
+  const months = {}; // key → { rows: [], days: Set }
+  for (const r of rows) {
+    const parts = r.date.split('/');
+    if (parts.length < 3) continue;
+    const key = `${Number(parts[1])}/${parts[2]}`;
+    if (!months[key]) months[key] = { rows: [], days: new Set() };
+    months[key].rows.push(r);
+    if (r.type === 'תחילת עבודה') months[key].days.add(r.date);
+  }
+  return months;
+}
+
+async function loadSummary() {
+  document.getElementById('current-month-stats').innerHTML =
+    '<div class="stat-cell" style="grid-column:1/-1"><p class="loading-txt">טוען...</p></div>';
+  document.getElementById('history-list').innerHTML = '<p class="loading-txt">טוען...</p>';
+
+  try {
+    const res = await fetch(`${API}?action=getAll`);
+    const raw = await res.json();
+
+    // Normalize: API may return array of rows, or { rows: [...] }, or { data: [...] }
+    const rawRows = Array.isArray(raw) ? raw
+                  : Array.isArray(raw.rows) ? raw.rows
+                  : Array.isArray(raw.data) ? raw.data
+                  : [];
+
+    const rows = rawRows.map(parseRow).filter(r => r.date && r.time && r.type);
+    // Sort chronologically
+    rows.sort((a, b) => toDate(a.date, a.time) - toDate(b.date, b.time));
+
+    const grouped = groupByMonth(rows);
+    renderSummary(grouped);
+  } catch (e) {
+    document.getElementById('current-month-stats').innerHTML =
+      '<div class="stat-cell" style="grid-column:1/-1"><p class="loading-txt">שגיאה בטעינת נתונים</p></div>';
+    document.getElementById('history-list').innerHTML = '';
+  }
+}
+
+function renderSummary(grouped) {
+  const now = new Date();
+  const curKey = `${now.getMonth()+1}/${now.getFullYear()}`;
+  const cur = grouped[curKey] || { rows: [], days: new Set() };
+
+  const totalMin = calcMinutes(cur.rows);
+  const days = cur.days.size;
+  const avgMin = days > 0 ? Math.round(totalMin / days) : 0;
+
+  document.getElementById('current-month-stats').innerHTML = `
+    <div class="stat-cell">
+      <div class="stat-num">${fmtHours(totalMin)}</div>
+      <div class="stat-desc">סה"כ חודש</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">${days}</div>
+      <div class="stat-desc">ימי עבודה</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">${fmtHours(avgMin)}</div>
+      <div class="stat-desc">ממוצע יומי</div>
+    </div>
+  `;
+
+  const histEl = document.getElementById('history-list');
+  const keys = Object.keys(grouped).filter(k => k !== curKey).sort((a, b) => {
+    const [am, ay] = a.split('/').map(Number);
+    const [bm, by] = b.split('/').map(Number);
+    return (by * 12 + bm) - (ay * 12 + am);
+  });
+
+  if (keys.length === 0) {
+    histEl.innerHTML = '<p class="loading-txt">אין היסטוריה עדיין</p>';
+    return;
+  }
+
+  histEl.innerHTML = keys.map(k => {
+    const [m, y] = k.split('/').map(Number);
+    const info = grouped[k];
+    return `<div class="month-row">
+      <span class="month-name">${hebrewMonth(m, y)}</span>
+      <span class="month-hours">${fmtHours(calcMinutes(info.rows))}</span>
+    </div>`;
+  }).join('');
+}
+
+updateButtons();
+</script>
+</body>
+</html>
